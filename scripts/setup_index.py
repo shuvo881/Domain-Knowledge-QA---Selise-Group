@@ -1,4 +1,3 @@
-# scripts/setup_index.py
 
 import os
 import pandas as pd
