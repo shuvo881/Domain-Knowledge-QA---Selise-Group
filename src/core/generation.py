@@ -1,3 +1,4 @@
+from langchain_core.prompts import ChatPromptTemplate
 from src.pydentic_models.rag_model import State
 from .model_emb import Loader
 
@@ -15,22 +16,13 @@ class QuestionAnsweringService:
 
     def generate_answer(self, state: State):
         try:
-            prompt_template = """
-                You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. 
-                If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.
-                Question: {question}
-                Context: {context}
-                Answer:
-            """
+            
 
             docs_content = "\n\n".join(doc.page_content for doc in state["context"])
 
-            formatted_prompt = prompt_template.format(
-                question=state['question'],
-                context=docs_content
-            )
-
-            response = self.llm.invoke(formatted_prompt)
+            prompt = ChatPromptTemplate.from_messages([("human", "You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.\nQuestion: {question} \nContext: {context} \nAnswer:"),])
+            messages = prompt.invoke({"question": state["question"], "context": docs_content})
+            response = self.llm.invoke(messages)
             if not response:
                 raise RuntimeError("Failed to generate an answer.")
             
