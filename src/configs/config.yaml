@@ -1,0 +1,22 @@
+# system:
+#   base_path: "./rag_data"
+#   collection_name: "documents"
+
+openai:
+  embedding_model: "text-embedding-3-large"
+  completion_model: "gpt-4o-mini"
+  max_tokens: 1000
+  temperature: 0.7
+
+# processing:
+#   chunk_size: 500
+#   chunk_overlap: 50
+#   max_input_length: 100000
+
+# chromadb:
+#   persist_directory: "chroma_db"
+#   anonymized_telemetry: false
+
+# retrieval:
+#   num_chunks: 5
+#   min_relevance_score: 0.7
