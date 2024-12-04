@@ -1,17 +1,20 @@
+import yaml
 from langchain_chroma import Chroma
 from .model_emb import Loader
-from .load_docs import load_docs, split_docs
-
+from .load_docs import DocumentProcessor
 
 class VectorStoreManager:
-    
-    def __init__(self, collection_name='example_collection', persist_directory="./src/data/processed"):
+    def __init__(self, config_path="./src/configs/config.yaml"):
+        self.config = self._load_config(config_path)
+        manager_config = self.config["vector_store_manager"]
+        self.collection_name = manager_config["collection_name"]
+        self.persist_directory = manager_config["persist_directory"]
 
-        self.collection_name = collection_name
-        self.persist_directory = persist_directory
+    def _load_config(self, config_path):
+        with open(config_path, "r") as file:
+            return yaml.safe_load(file)
 
     def _initialize_vector_store(self):
-
         try:
             loader = Loader()
             self.embeddings = loader.load_model_emb()
@@ -34,16 +37,11 @@ class VectorStoreManager:
             raise RuntimeError("Vector store is not initialized. Call `initialize_vector_store` first.")
 
         try:
-            # Load and split documents
-            docs = load_docs()
-            if not docs:
-                raise RuntimeError("No documents were loaded. Please check the data source.")
-
-            splits = split_docs(docs)
+            processor = DocumentProcessor()
+            splits = processor.process()
             if not splits:
                 raise RuntimeError("Failed to split documents into chunks.")
-
-
+            
             ids = vector_store.add_documents(documents=splits)
             if not ids:
                 raise RuntimeError("Failed to add document chunks to the vector store.")
@@ -51,23 +49,3 @@ class VectorStoreManager:
             return len(ids)
         except Exception as e:
             raise RuntimeError(f"Error during document indexing: {e}")
-
-
-def main():
-    """
-    Main function to demonstrate the usage of VectorStoreManager.
-    """
-    try:
-        # Initialize and use the VectorStoreManager
-        manager = VectorStoreManager(collection_name="example_collection")
-        chunks_indexed = manager.index_documents()
-        print(f"Indexed {chunks_indexed} document chunks.")
-
-        # Example of using the returned vector store directly
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-
-# if __name__ == "__main__":
-#     main()

@@ -1,27 +1,45 @@
-import bs4
-from langchain_community.document_loaders import WebBaseLoader
+import yaml
+from langchain_community.document_loaders import JSONLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-# Only keep post title, headers, and content from the full HTML.
-def load_docs():
-    bs4_strainer = bs4.SoupStrainer(class_=("post-title", "post-header", "post-content"))
-    loader = WebBaseLoader(
-        web_paths=("https://lilianweng.github.io/posts/2023-06-23-agent/",),
-        bs_kwargs={"parse_only": bs4_strainer},
-    )
-    docs = loader.load()
 
-    return docs
+class DocumentProcessor:
+    def __init__(self, config_path="./src/configs/config.yaml"):
+        self.config = self._load_config(config_path)
 
-def split_docs(docs):
+    def _load_config(self, config_path):
 
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,  # chunk size (characters)
-        chunk_overlap=200,  # chunk overlap (characters)
-        add_start_index=True,  # track index in original document
-    )
-    all_splits = text_splitter.split_documents(docs)
+        with open(config_path, "r") as file:
+            config = yaml.safe_load(file)
+        return config
 
-    print(f"Split blog post into {len(all_splits)} sub-documents.")
+    def load_docs(self):
+        
+        loader_config = self.config["document_loader"]
+        loader = JSONLoader(
+            file_path=loader_config["file_path"],
+            jq_schema=loader_config["jq_schema"],
+            text_content=loader_config["text_content"],
+            json_lines=loader_config["json_lines"],
+        )
+        docs = loader.load()
+        return docs
 
-    return all_splits
+    def split_docs(self, docs):
+
+        splitter_config = self.config["processing"]
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=splitter_config["chunk_size"],
+            chunk_overlap=splitter_config["chunk_overlap"],
+            add_start_index=splitter_config["add_start_index"],
+        )
+        all_splits = text_splitter.split_documents(docs)
+        print(f"Split blog post into {len(all_splits)} sub-documents.")
+        return all_splits
+
+    def process(self):
+        docs = self.load_docs()
+        return self.split_docs(docs)
+
+
+

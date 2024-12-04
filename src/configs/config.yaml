@@ -2,20 +2,26 @@
 #   base_path: "./rag_data"
 #   collection_name: "documents"
 
+document_loader:
+  file_path: "data/raw/test.jsonl"
+  jq_schema: ".messages[].content"
+  text_content: false
+  json_lines: true
+
 openai:
   embedding_model: "text-embedding-3-large"
   completion_model: "gpt-4o-mini"
   max_tokens: 1000
   temperature: 0.7
 
-# processing:
-#   chunk_size: 500
-#   chunk_overlap: 50
-#   max_input_length: 100000
+processing:
+  chunk_size: 1000  
+  chunk_overlap: 200 
+  add_start_index: true 
 
-# chromadb:
-#   persist_directory: "chroma_db"
-#   anonymized_telemetry: false
+vector_store_manager:
+  collection_name: "example_collection"
+  persist_directory: "./data/processed"
 
 # retrieval:
 #   num_chunks: 5
