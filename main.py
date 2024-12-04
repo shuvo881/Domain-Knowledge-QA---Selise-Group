@@ -3,7 +3,7 @@ from src.pydentic_models.rag_model import State
 
 
 if __name__ == "__main__":
-    input_message = "How are CEO of Serenus One?"
+    input_message = "Who is Rez?"
 
     # Initialize the pipeline with the State model
     pipeline = QuestionAnsweringPipeline(State)

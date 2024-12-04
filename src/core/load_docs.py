@@ -1,6 +1,7 @@
 import yaml
 import os
-from langchain_community.document_loaders import JSONLoader
+import pandas as pd
+from langchain_community.document_loaders import JSONLoader, TextLoader, CSVLoader, PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
@@ -25,7 +26,7 @@ class DocumentProcessor:
         elif os.path.isdir(file_path):  # Directory of files
             for filename in os.listdir(file_path):
                 full_path = os.path.join(file_path, filename)
-                if filename.endswith(".jsonl") and os.path.isfile(full_path):
+                if os.path.isfile(full_path):
                     docs.extend(self._load_single_file(full_path, loader_config))
         else:
             raise ValueError(f"Invalid path: {file_path}. It must be a file or directory.")
@@ -34,13 +35,42 @@ class DocumentProcessor:
 
     def _load_single_file(self, file_path, loader_config):
 
-        loader = JSONLoader(
-            file_path=file_path,
-            jq_schema=loader_config["jq_schema"],
-            text_content=loader_config["text_content"],
-            json_lines=loader_config["json_lines"],
-        )
-        return loader.load()
+        ext = os.path.splitext(file_path)[1].lower()
+        if ext == ".json":
+            loader = JSONLoader(
+                file_path=file_path,
+                jq_schema='.[].content',
+                text_content=loader_config["text_content"],
+                json_lines=False,  # Regular JSON
+            )
+            return loader.load()
+        elif ext == ".jsonl":
+            loader = JSONLoader(
+                file_path=file_path,
+                jq_schema='.messages[].content',
+                text_content=loader_config["text_content"],
+                json_lines=True,  # JSON Lines
+            )
+            return loader.load()
+        elif ext == ".parquet":
+            return self._load_parquet(file_path)
+        elif ext == ".txt":
+            loader = TextLoader(file_path=file_path)
+            return loader.load()
+        elif ext == ".csv":
+            loader = CSVLoader(file_path=file_path)
+            return loader.load()
+        elif ext == ".pdf":
+            loader = PyPDFLoader(file_path=file_path)
+            return loader.load()
+        else:
+            raise ValueError(f"Unsupported file format: {ext}")
+
+    def _load_parquet(self, file_path):
+
+        df = pd.read_parquet(file_path)
+        # Convert to list of dictionaries or strings (modify as per downstream requirements)
+        return [{"content": row.to_dict()} for _, row in df.iterrows()]
 
     def split_docs(self, docs):
 
