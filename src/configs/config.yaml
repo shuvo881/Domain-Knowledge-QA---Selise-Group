@@ -3,7 +3,7 @@
 #   collection_name: "documents"
 
 document_loader:
-  file_path: "data/raw/test.jsonl"
+  file_path: "data/raw/"
   jq_schema: ".messages[].content"
   text_content: false
   json_lines: true
