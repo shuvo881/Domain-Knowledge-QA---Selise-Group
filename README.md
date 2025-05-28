@@ -1,6 +1,6 @@
 # Retrieval-Augmented Generation (RAG) System
 
-This project implements a Retrieval-Augmented Generation (RAG) system using FastAPI, FAISS, and GPT-Neo. The goal is to create a backend service capable of answering user questions by retrieving relevant information from a set of documents and generating responses using a language model.
+This project implements a Retrieval-Augmented Generation (RAG) system using FastAPI, ChromaDB, and GPT-4. The goal is to create a backend service capable of answering user questions by retrieving relevant information from a set of documents and generating responses using a language model.
 
 ## Table of Contents
 - [Project Overview](#project-overview)
