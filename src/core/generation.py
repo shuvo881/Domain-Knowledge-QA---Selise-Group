@@ -20,7 +20,20 @@ class QuestionAnsweringService:
 
             docs_content = "\n\n".join(doc.page_content for doc in state["context"])
 
-            prompt = ChatPromptTemplate.from_messages([("human", "You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.\nQuestion: {question} \nContext: {context} \nAnswer:"),])
+            prompt = ChatPromptTemplate.from_messages([
+                ("human",
+                """You are a factual assistant for question-answering tasks. 
+                Use only the information provided in the context to answer the question. 
+                Do not invent, guess, or hallucinate any information. 
+                If the answer is not in the context, respond with 'I don't know'. 
+                Keep the answer concise, maximum three sentences.
+
+                Question: {question}
+                Context: {context}
+
+                Answer:""")
+            ])
+
             messages = prompt.invoke({"question": state["question"], "context": docs_content})
             response = self.llm.invoke(messages)
             if not response:
