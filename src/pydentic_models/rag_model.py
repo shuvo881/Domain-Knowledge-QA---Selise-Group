@@ -6,3 +6,5 @@ class State(TypedDict):
     question: str
     context: List[Document]
     answer: str
+    critique: str
+    improvement_needed: bool
