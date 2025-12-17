@@ -7,21 +7,16 @@ document_loader:
   text_content: false
   
 
-openai:
-  embedding_model: "text-embedding-3-large"
-  completion_model: "gpt-4o-mini"
-  max_tokens: 1000
-  temperature: 0.7
-
 processing:
   chunk_size: 1000  
   chunk_overlap: 200 
   add_start_index: true 
 
 vector_store_manager:
-  collection_name: "example_collection"
+  collection_name: "example_collection_1536"
   persist_directory: "./data/processed"
+  vector_size: 1536
 
-# retrieval:
-#   num_chunks: 5
-#   min_relevance_score: 0.7
+retrieval:
+  num_chunks: 5
+  min_relevance_score: 0.7

@@ -3,10 +3,12 @@ from src.pydentic_models.rag_model import State
 
 
 if __name__ == "__main__":
-    input_message = "Who is Rez?"
+    input_message = "What is the capital of France?"
 
     # Initialize the pipeline with the State model
     pipeline = QuestionAnsweringPipeline(State)
     # Stream and print responses from the pipeline
     for response in pipeline.stream_responses(input_message):
         print(response, end="")
+
+    print()  # For a clean newline after the streaming output

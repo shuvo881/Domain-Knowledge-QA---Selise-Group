@@ -2,7 +2,7 @@ import yaml
 import os
 import pandas as pd
 from langchain_community.document_loaders import JSONLoader, TextLoader, CSVLoader, PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 class DocumentProcessor:

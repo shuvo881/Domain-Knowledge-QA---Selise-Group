@@ -1,5 +1,7 @@
 import yaml
-from langchain_chroma import Chroma
+from qdrant_client.models import Distance, VectorParams
+from langchain_qdrant import QdrantVectorStore
+from qdrant_client import QdrantClient
 from .model_emb import Loader
 from .load_docs import DocumentProcessor
 
@@ -9,6 +11,7 @@ class VectorStoreManager:
         manager_config = self.config["vector_store_manager"]
         self.collection_name = manager_config["collection_name"]
         self.persist_directory = manager_config["persist_directory"]
+        self.qdrant_client = QdrantClient(url="http://localhost:6333",)
 
     def _load_config(self, config_path):
         with open(config_path, "r") as file:
@@ -21,11 +24,22 @@ class VectorStoreManager:
             if not self.embeddings:
                 raise RuntimeError("Failed to initialize the embedding model.")
 
-            vector_store = Chroma(
+            if not self.qdrant_client.collection_exists(self.collection_name):
+                self.qdrant_client.create_collection(
+                    collection_name=self.collection_name,
+                    vectors_config=VectorParams(size=self.config["vector_store_manager"]["vector_size"], distance=Distance.COSINE)
+                )
+            vector_store = QdrantVectorStore(
+                client=self.qdrant_client,
                 collection_name=self.collection_name,
-                embedding_function=self.embeddings,
-                persist_directory=self.persist_directory,
+                embedding=self.embeddings,
             )
+
+            # vector_store = Chroma(
+            #     collection_name=self.collection_name,
+            #     embedding_function=self.embeddings,
+            #     persist_directory=self.persist_directory,
+            # )
             print(f"Vector store '{self.collection_name}' initialized successfully.")
             return vector_store
         except Exception as e:
